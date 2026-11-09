@@ -3,7 +3,16 @@ from app.routers import items
 from app.config import Settings
 
 settings = Settings()
-app = FastAPI(title=settings.app_name)
+
+app = FastAPI(
+    title=settings.app_name,
+    description="Лабораторная работа по FastAPI",
+    version="1.0.0",
+    contact={
+        "name": "Студент",
+        "email": settings.admin_email,
+    },
+)
 
 app.include_router(items.router)
 
