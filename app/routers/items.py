@@ -5,6 +5,7 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 fake_db: dict[int, dict] = {
     1: {"name": "Foo", "price": 50.2},
+    2: {"name": "Телефон", "price": 50.2},
 }
 
 class Item(BaseModel):
@@ -23,4 +24,22 @@ def read_item(
 
 @router.post("/", response_model=Item)
 def create_item(item: Item):
+    return item
+
+@router.put("/{item_id}", response_model=Item)
+def update_item(
+    item_id: int = Path(..., title="ID товара", ge=1),
+    item: Item = None,
+):
+    if item_id not in fake_db:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    for other_id, other in fake_db.items():
+        if other_id != item_id and other["name"] == item.name:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Item with name '{item.name}' already exists",
+            )
+
+    fake_db[item_id] = item.model_dump()
     return item
