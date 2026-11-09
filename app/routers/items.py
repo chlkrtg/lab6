@@ -22,8 +22,17 @@ def read_item(
         raise HTTPException(status_code=404, detail="Item not found")
     return {"item_id": item_id, "item": fake_db[item_id], "q": q}
 
+
 @router.post("/", response_model=Item)
 def create_item(item: Item):
+    for existing_item in fake_db.values():
+        if existing_item["name"] == item.name:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Item with name '{item.name}' already exists",
+            )
+    new_id = max(fake_db.keys(), default=0) + 1
+    fake_db[new_id] = item.model_dump()
     return item
 
 @router.put("/{item_id}", response_model=Item)
